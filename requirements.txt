@@ -1,3 +1,8 @@
-requests == 2.31.0
+requests == 2.32.2
 pyinstaller == 5.13.0
 termcolor == 2.3.0
+steam @ git+https://github.com/solsticegamestudios/steam@30437f32e625b52c6cee34dac5eb14652447379f
+gevent-eventemitter ~= 2.1
+protobuf ~= 5.29.3
+wsproto ~= 1.2.0
+pillow == 12.1.1

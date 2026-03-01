@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Steam Icon Fixer, Version 1.0
 # Copyright (C) 2023 Liam "AyesC" Hogan
 #
@@ -16,4 +14,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/.
 
-from steamiconfixer import main
+import os
+
+from steamiconfixer.compat import windows
+from steamiconfixer.compat import linux
+
+def getcompat():
+    if os.name == "nt":
+        return windows
+    elif os.name == "posix":
+        return linux
+    else:
+        return None

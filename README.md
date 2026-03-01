@@ -7,11 +7,14 @@ library, or after transferring games from one Steam library to another. The reas
 this issue occurs is because the Steam client doesn't redownload the icon file
 for games added to your library from another PC or drive.
 
+Steam on Linux does not download icons at all, instead setting all shortcuts to show
+the Steam icon.
+
 This tool goes through all of your shortcuts, either on your desktop or better,
 in your start folder, and downloads the icon for each shortcut. The end result
 is the icons reappearing on your shortcuts.
 
-## Usage
+## Usage (Windows)
 
 For normal users, download the latest release build. Place the exe file somewhere,
 doesn't really matter where. Open a terminal in the same folder as it (you can hold
@@ -42,7 +45,7 @@ sif.exe "C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Prog
 ```
 
 > If you are using PowerShell, you will need to put `./` in front of the executable
-name. Example: `./sif.exe`
+> name. Example: `./sif.exe`
 
 Fatal errors:
 
@@ -53,12 +56,25 @@ Any errors that occur during the process will be logged, so it is recommended to
 read over the output in the terminal once it is complete to identify any errors
 that may have occured.
 
+## Usage (Linux)
+
+Some usage examples:
+
+```sh
+sif ~/.local/share/applications $HOME/.icons
+sif /usr/share/applications/ /usr/share/pixmaps
+```
+
+Please note that your desktop environment may not reload the new icons immediately.
+Logging out and back in, restarting, or forcing your DE to reload the icons may be
+necessary.
+
 ## Building
 
 Steam Icon Fixer requires these dependencies to be built:
 
 - Python 3.11.4 (or similar)
-- Windows 7 or newer
+- Windows 7 or newer or Linux
 
 After cloning, install Python dependencies with:
 
@@ -76,7 +92,7 @@ build.cmd
 ```
 
 > If you are using PowerShell, you will need to put `./` in front of the executable
-name. Example: `./build.cmd`
+> name. Example: `./build.cmd`
 
 ## Contributing
 
