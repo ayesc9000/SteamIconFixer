@@ -10,5 +10,3 @@ exit
 :error
 echo ----- Build failed -----
 exit
-> [!NOTE]
-> Quotations are only necessary if the path contains spaces.
