@@ -126,8 +126,9 @@ Finally, create the executable by running the build script:
 build.cmd
 ```
 
-> If you are using PowerShell, you will need to put `./` in front of the executable
-> name. Example: `./build.cmd`
+> [!TIP]
+> If you are using PowerShell, you will need to put `./` in front of the script
+> file name. Example: `./build.cmd`
 
 ## Contributing
 
