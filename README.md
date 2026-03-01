@@ -7,12 +7,13 @@ library, or after transferring games from one Steam library to another. The reas
 this issue occurs is because the Steam client doesn't redownload the icon file
 for games added to your library from another PC or drive.
 
-Steam on Linux does not download icons at all, instead setting all shortcuts to show
-the Steam icon.
-
 This tool goes through all of your shortcuts, either on your desktop or better,
 in your start folder, and downloads the icon for each shortcut. The end result
 is the icons reappearing on your shortcuts.
+
+Additionally, this tool can now work with Steam on Linux, where icons are
+normally not downloaded at all. Icons will not only be downloaded, but can be
+assigned to their corresponding shortcuts on your desktop automatically.
 
 ## Usage (Windows)
 
@@ -27,13 +28,14 @@ Steam shortcuts in the start menu by searching for any game, and selecting the
 "Open file location" option. You can also right-click any game in the start menu
 for the same option. Once open, copy the folder path from the file explorer window.
 
-Once you have the path to your shortcuts, you can invoke the tool by following the
-syntax below:
+Once you have the path to your shortcuts, you can invoke the tool by providing
+the path as the first argument:
 
 ```shell
-sif.exe "path to file"
+sif.exe "path to shortcuts folder"
 ```
 
+> [!NOTE]
 > Quotations are only necessary if the path contains spaces.
 
 Some usage examples:
@@ -44,6 +46,7 @@ sif.exe "C:\\Users\\user\\Desktop\\Steam Games"
 sif.exe "C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Steam"
 ```
 
+> [!TIP]
 > If you are using PowerShell, you will need to put `./` in front of the executable
 > name. Example: `./sif.exe`
 
@@ -58,23 +61,56 @@ that may have occured.
 
 ## Usage (Linux)
 
-Some usage examples:
+For Linux users, you will need to download the repository as binary versions of
+SIF for Linux are currently not available. You can either use git or download
+the repository as a ZIP file through GitHub. Clone/unzip SIF to any directory
+(preferably in your home directory, but not required).
 
-```sh
-sif ~/.local/share/applications $HOME/.icons
-sif /usr/share/applications/ /usr/share/pixmaps
+You will also need to make sure Python 3.13.0 or later is installed on your
+system before proceeding. Most package managers should carry this version of
+Python or newer. If you're not sure how to do this, please consult the
+documentation provided by your distribution.
+
+Open a terminal or change directory to the location of the SIF repository and
+make the SIF script executable with `chmod +x sif.py`.
+
+From this point you can use SIF the same way you would on Windows by providing
+the location of the directory containing your Steam shortcuts as an argument.
+You will also however need to provide a second argument to the directory where
+you would like the icon files to be saved. You should follow the XDG/FreeDesktop
+directory specifications wherever possible to keep things organized. This
+directory must be somewhere where your DE will have permissions to read from.
+(Making/using a folder in your home directory is HIGHLY recommended)
+
+```shell
+./sif.py "path to shortcuts directory" "path to icon storage directory"
 ```
 
-Please note that your desktop environment may not reload the new icons immediately.
-Logging out and back in, restarting, or forcing your DE to reload the icons may be
-necessary.
+> [!NOTE]
+> Quotations are only necessary if the paths contains spaces.
+
+Some usage examples:
+
+```shell
+./sif.py ~/.local/share/applications $HOME/.icons
+./sif.py /usr/share/applications/ /usr/share/pixmaps
+```
+
+> [!WARNING]
+> Your desktop environment may not load the new icons immediately. Logging out
+> and back in, restarting, or forcing your DE to reload the icons may be
+> necessary.
 
 ## Building
 
+> [!IMPORTANT]
+> This is only relevant for Windows users. Binary versions of SIF for Linux are
+> currently not supported.
+
 Steam Icon Fixer requires these dependencies to be built:
 
-- Python 3.11.4 (or similar)
-- Windows 7 or newer or Linux
+- Python 3.13.0 or later
+- Windows 7 or newer
 
 After cloning, install Python dependencies with:
 
