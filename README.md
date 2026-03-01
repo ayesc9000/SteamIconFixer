@@ -76,14 +76,14 @@ make the SIF script executable with `chmod +x sif.py`.
 
 From this point you can use SIF the same way you would on Windows by providing
 the location of the directory containing your Steam shortcuts as an argument.
-You will also however need to provide a second argument to the directory where
-you would like the icon files to be saved. You should follow the XDG/FreeDesktop
+You can also provide an optional second argument to the directory where you
+would like the icon files to be saved. You should follow the XDG/FreeDesktop
 directory specifications wherever possible to keep things organized. This
 directory must be somewhere where your DE will have permissions to read from.
 (Making/using a folder in your home directory is HIGHLY recommended)
 
 ```shell
-./sif.py "path to shortcuts directory" "path to icon storage directory"
+./sif.py "path to shortcuts directory" ["path to icon storage directory"]
 ```
 
 > [!NOTE]
