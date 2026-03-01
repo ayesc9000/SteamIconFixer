@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Steam Icon Fixer, Version 1.0
+# Steam Icon Fixer
 # Copyright (C) 2023 Liam "AyesC" Hogan
 #
 # This program is free software: you can redistribute it and/or modify

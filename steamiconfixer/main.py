@@ -1,5 +1,5 @@
-# Steam Icon Fixer, Version 1.0
-# Copyright (C) 2023 Liam "AyesC" Hogan
+# Steam Icon Fixer
+# Copyright (C) 2026 Liam "AyesC" Hogan
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,8 +28,8 @@ icons = {}
 baseurl = "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/"
 # baseurl = "https://shared.fastly.steamstatic.com/community_assets/images/apps/" # Alternative URL
 
-license = """\nSteam Icon Fixer, Version 1.0
-Copyright (C) 2023 Liam "AyesC" Hogan
+license = """\nSteam Icon Fixer, Version 1.1
+Copyright (C) 2026 Liam "AyesC" Hogan
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
