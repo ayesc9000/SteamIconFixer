@@ -78,9 +78,8 @@ From this point you can use SIF the same way you would on Windows by providing
 the location of the directory containing your Steam shortcuts as an argument.
 You can also provide an optional second argument to the directory where you
 would like the icon files to be saved. You should follow the XDG/FreeDesktop
-directory specifications wherever possible to keep things organized. This
-directory must be somewhere where your DE will have permissions to read from.
-(Making/using a folder in your home directory is HIGHLY recommended)
+directory specifications wherever possible to keep things organized, and use a
+directory that your DE will have permission to read from.
 
 ```shell
 ./sif.py "path to shortcuts directory" ["path to icon storage directory"]
