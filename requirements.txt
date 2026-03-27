@@ -6,3 +6,4 @@ gevent-eventemitter ~= 2.1
 protobuf ~= 5.29.3
 wsproto ~= 1.2.0
 pillow == 12.1.1
+PyGObject == 3.56.2

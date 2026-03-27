@@ -25,8 +25,10 @@ from termcolor import colored
 from steamiconfixer.compat import compat
 
 icons = {}
-baseurl = "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/"
-# baseurl = "https://shared.fastly.steamstatic.com/community_assets/images/apps/" # Alternative URL
+baseurls = [
+    "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/",
+    "https://shared.fastly.steamstatic.com/community_assets/images/apps/",
+    ]
 
 license = """\nSteam Icon Fixer, Version 1.1
 Copyright (C) 2026 Liam "AyesC" Hogan
@@ -75,6 +77,8 @@ if os.path.isfile(searchpath):
 # Create list of icons
 print("Searching for valid Steam shortcuts in " + searchpath + "...")
 
+compat.refreshiconcache()
+
 for filename in os.scandir(searchpath):
     # Igore directories or any files that are not .url or .desktop files
     if not filename.is_file():
@@ -118,14 +122,29 @@ print("Downloading " + str(len(icons)) + " icons...")
 
 errors = 0
 
+current_baseurl_index = 0
+current_baseurl = baseurls[current_baseurl_index]
+
 for steamid, icon in icons.items():
     # Create the URL and make a request
-    url = baseurl + steamid + "/" + icon.name
+    url = current_baseurl + steamid + "/" + icon.name
     response = requests.get(url)
+
+    while not response.ok:
+        print(colored("Got code " + str(response.status_code) + " at CDN " + current_baseurl, "red"))
+        current_baseurl_index = current_baseurl_index + 1
+        if current_baseurl_index < len(baseurls):
+            current_baseurl = baseurls[current_baseurl_index]
+            print(colored("Retrying with CDN " + current_baseurl, "red"))
+            url = current_baseurl + steamid + "/" + icon.name
+            response = requests.get(url)
+        else:
+            print(colored("All CDNs failed to respond", "red"))
+            sys.exit(0)
 
     # Check if response was ok
     if not response.ok:
-        print(colored(steamid + ": Failed to download icon. Response code was " + response.status_code + ".", "red"))
+        print(colored(steamid + ": Failed to download icon. Response code was " + str(response.status_code) + ".", "red"))
         errors = errors + 1
         continue
 
@@ -149,3 +168,5 @@ for steamid, icon in icons.items():
     print(colored(steamid + ": Downloaded and saved successfully.", "green"))
 
 print("\nDownloading completed with " + str(errors) + " errors. Refer to the above log for details.")
+
+compat.refreshiconcache()

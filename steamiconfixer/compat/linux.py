@@ -23,8 +23,13 @@ from steam.client import SteamClient
 from steam.enums.emsg import EMsg
 from PIL import Image
 from pathlib import Path
+import subprocess
 
 from ..types import Icon
+
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
 
 usage = """---------------------------------------------
 
@@ -32,6 +37,7 @@ Usage:
 sif <path to file> [path to icons]
 
 Examples:
+sif ~/.local/share/applications
 sif ~/Desktop
 sif ~/Desktop/Steam Games
 sif ~/.local/share/applications $HOME/.icons
@@ -43,15 +49,25 @@ Errors & Exit Codes:
 Incompatible operating system (exit code 100)
 """
 
+gtk_sizes = [16, 32, 48, 64, 128, 256, 512, 1024, 2048]
+gtk_user_path = os.path.expandvars('$HOME/.local/share/icons/hicolor')
+gtk_icon_theme = Gtk.IconTheme.get_default()
+
 steamapi = SteamClient()
 steamapi.anonymous_login()
+
+def refreshiconcache():
+    print("Refreshing icon cache")
+    Path(gtk_user_path).touch()
+    subprocess.run(["gtk-update-icon-cache"])
 
 def isshortcut(filename):
     return filename.name.endswith(".desktop")
 
 def setupiconpath(filename):
     if len(filename) == 0:
-        filename = os.path.expandvars("$HOME/.icons")
+        # Empty path signifies use Gtk icon paths
+        return ''
     if not os.path.exists(filename):
         os.makedirs(filename)
     return filename
@@ -71,14 +87,24 @@ def readshortcut(filename):
         iconpathmatch = re.search(r"Icon=([^\n]*)\n", contents)
 
         if steamidmatch == None or iconpathmatch == None:
-            print(colored(filename.name + ": Shortcut doesn't appear to be a Steam shortcut. Skipping.", "yellow"))
+            print(colored(filename.name + ": Shortcut doesn't appear to be a Steam shortcut. Skipping.", "blue"))
             return None
 
         steamid = steamidmatch.group(1)
         iconpath = iconpathmatch.group(1)
 
         # Check if the icon exists
-        if iconpath != "steam" and os.path.exists(iconpath):
+        if iconpath == "steam":
+            pass
+        elif not Path(iconpath).is_absolute():
+            # Ex: "steam_icon_440" can be valid as long as "steam_icon_440.png" exists within a valid icon search directory
+            gtk_icon_exists = gtk_icon_theme.has_icon(iconpath)
+            gtk_icon = gtk_icon_theme.lookup_icon(iconpath, 256, 0)
+            if gtk_icon_theme.has_icon(iconpath):
+                print(colored(filename.name + ": Icon file is present, nothing needs to be done. Skipping.", "green"))
+                return None
+        elif os.path.exists(iconpath):
+            # Absolute icon paths to anywhere are also valid, however certain directories are recommended, such as $HOME/.icons
             if not os.path.isfile(iconpath):
                 print(colored(filename.name + ": Icon path is a directory. This error must be fixed manually. Skipping.", "red"))
                 return None
@@ -100,10 +126,25 @@ def readshortcut(filename):
         return Icon(steamid, iconpath, iconname, filename)
 
 def writeicon(icon, response, iconpath):
+    # Empty iconpath means use Gtk icons
     img = Image.open(io.BytesIO(response.content))
-    savepath = Path(os.path.join(iconpath, "steamicon_" + Path(icon.name).stem + ".png")).resolve()
-    img.save(savepath, "PNG")
-    return str(savepath)
+    if len(iconpath) == 0:
+        name = "steam_icon_" + icon.steamid
+        width, height = img.size
+        for x in gtk_sizes:
+            if width < x and height < x:
+                break
+            full_dir = os.path.join(gtk_user_path, str(x) + "x" + str(x) + "/apps")
+            if not os.path.exists(full_dir):
+                os.makedirs(full_dir)
+            thumb = img.copy()
+            thumb.thumbnail((x, x), Image.LANCZOS)
+            thumb.save(os.path.join(full_dir, name + ".png"), "PNG")
+        return name
+    else:
+        savepath = Path(os.path.join(iconpath, "steam_icon_" + icon.steamid + ".png")).resolve()
+        img.save(savepath, "PNG")
+        return str(savepath)
 
 def updateshortcuts(icon, searchpath, iconpath):
     with open(icon.shortcutfilename, "r") as file:
