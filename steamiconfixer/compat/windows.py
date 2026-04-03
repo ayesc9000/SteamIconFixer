@@ -37,6 +37,10 @@ Errors & Exit Codes:
 Incompatible operating system (exit code 100)
 """
 
+def refreshiconcache():
+    # Unneeded on Windows
+    pass
+
 def isshortcut(filename):
     return filename.name.endswith(".url")
 
@@ -59,7 +63,7 @@ def readshortcut(filename):
         iconnamematch = re.search(r"\\([^\n\\]*)\n", contents)
 
         if steamidmatch == None or iconpathmatch == None or iconnamematch == None:
-            print(colored(filename.name + ": Shortcut doesn't appear to be a Steam shortcut. Skipping.", "yellow"))
+            print(colored(filename.name + ": Shortcut doesn't appear to be a Steam shortcut. Skipping.", "blue"))
             return None
 
         steamid = steamidmatch.group(1)
