@@ -1,7 +1,1 @@
-build/**
-dist/**
-sif.spec
-
 **/__pycache__
-venv/
-.local/
