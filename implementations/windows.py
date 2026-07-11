@@ -39,7 +39,7 @@ def refresh_icon_cache():
 
 def setup_icon_storage_path(filename):
     # Unused on Windows
-    return ""
+    pass
 
 def is_shortcut(filename):
     return filename.name.endswith(".url")
