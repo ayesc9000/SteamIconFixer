@@ -1,3 +1,14 @@
+# TESTING WANTED!
+
+A newly refactored version of Steam Icon Fixer (v2) has been written, but has not
+yet been fully tested. If you want to give it a try, go over to the v2 branch and
+download the latest commit. Please open issues with any problems you find!
+
+I do not yet have premade builds of v2 ready to download, but you can run the
+main.py script directly or build it yourself.
+
+---
+
 # Steam Icon Fixer
 
 Steam Icon Fixer is a simple tool to fix Steam shortcuts that don't have an icon.
