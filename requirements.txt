@@ -1,8 +1,5 @@
-requests == 2.32.2
-termcolor == 2.3.0
-steam @ git+https://github.com/solsticegamestudios/steam@30437f32e625b52c6cee34dac5eb14652447379f
-gevent-eventemitter ~= 2.1
-protobuf ~= 5.29.3
-wsproto ~= 1.2.0
-pillow == 12.1.1
-PyGObject == 3.56.2
+pillow == 12.3.0
+PyGObject == 3.56.3
+requests == 2.34.2
+steam @ git+https://github.com/solsticegamestudios/steam@1373e885f26bb636225443787f54d4082283e5f3
+termcolor == 3.3.0
