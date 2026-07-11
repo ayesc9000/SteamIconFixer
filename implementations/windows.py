@@ -33,12 +33,12 @@ def refresh_icon_cache():
     # Unused on Windows
     return True
 
-def is_shortcut(filename):
-    return filename.name.endswith(".url")
-
-def setup_iconpath(filename):
+def setup_icon_storage_path(filename):
     # Unused on Windows
     return ""
+
+def is_shortcut(filename):
+    return filename.name.endswith(".url")
 
 def read_shortcut(filename):
     with open(filename, "r") as file:
@@ -76,11 +76,11 @@ def read_shortcut(filename):
         cprint(filename.name + ": Icon is missing and will be redownloaded.", "yellow")
         return Icon(steamid, iconpath, iconname, filename)
 
-def write_icon(icon, response, iconpath):
+def write_icon(icon, response, icon_storage):
     with open(icon.path, "wb") as file:
         file.write(response.content)
     return icon.path
 
-def update_shortcuts(icon, searchpath, iconpath):
+def update_shortcuts(icon, write_path):
     # Unused on Windows
     return None
