@@ -37,21 +37,21 @@ def refresh_icon_cache():
     # Unused on Windows
     return True
 
-def setup_icon_storage_path(filename):
+def setup_icon_storage_path(icon_storage):
     # Unused on Windows
     pass
 
-def is_shortcut(filename):
-    return filename.name.endswith(".url")
+def is_shortcut(file):
+    return file.name.endswith(".url")
 
-def read_shortcut(filename):
-    with open(filename, "r") as file:
+def read_shortcut(file):
+    with open(file, "r") as file:
         # Read contents and check if it is a valid internet shortcut file
         contents = file.read()
         isvalid = re.search(r"\[InternetShortcut\]\n", contents)
 
         if isvalid is None:
-            cprint(filename.name + ": File is not a valid internet shortcut. Skipping.", "yellow")
+            cprint(file.name + ": File is not a valid shortcut. Skipping.", "yellow")
             return None
 
         # Get the Steam ID, icon path, and icon file name
@@ -60,7 +60,7 @@ def read_shortcut(filename):
         iconnamematch = re.search(r"\\([^\n\\]*)\n", contents)
 
         if steamidmatch is None or iconpathmatch is None or iconnamematch is None:
-            cprint(filename.name + ": Shortcut doesn't appear to be a Steam shortcut. Skipping.", "blue")
+            cprint(file.name + ": Shortcut doesn't appear to be a Steam shortcut. Skipping.", "blue")
             return None
 
         steamid = steamidmatch.group(1)
@@ -70,15 +70,15 @@ def read_shortcut(filename):
         # Check if the icon exists
         if os.path.exists(iconpath):
             if not os.path.isfile(iconpath):
-                cprint(filename.name + ": Icon path is a directory. This error must be fixed manually.", "red")
+                cprint(file.name + ": Icon path is a directory. This error must be fixed manually.", "red")
                 return None
             else:
-                cprint(filename.name + ": Icon is present, nothing needs to be done.", "green")
+                cprint(file.name + ": Icon is present, nothing needs to be done.", "green")
                 return None
 
         # Create an icon object and place it into the icon collection
-        cprint(filename.name + ": Icon is missing and will be redownloaded.", "yellow")
-        return Icon(steamid, iconpath, iconname, filename)
+        print(file.name + ": Icon is missing and will be redownloaded.")
+        return Icon(steamid, iconpath, iconname, file)
 
 def write_icon(icon, response, icon_storage):
     with open(icon.path, "wb") as file:
