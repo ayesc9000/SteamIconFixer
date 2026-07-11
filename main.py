@@ -83,6 +83,7 @@ if not icon_storage == "":
         sys.exit(-3)
 
 # Create list of icons
+implementation.initialize()
 if not implementation.refresh_icon_cache():
     sys.exit(-4)
 

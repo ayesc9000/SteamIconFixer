@@ -29,6 +29,10 @@ python sif.pyz "C:\\Users\\user\\Desktop\\Steam Games"
 python sif.pyz "C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Steam"
 """
 
+def initialize():
+    # Unused on Windows
+    pass
+
 def refresh_icon_cache():
     # Unused on Windows
     return True
