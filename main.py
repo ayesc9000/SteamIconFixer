@@ -15,7 +15,6 @@
 # along with this program. If not, see https://www.gnu.org/licenses/.
 
 import os
-import re
 import requests
 import sys
 import traceback
@@ -33,16 +32,17 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/.\n\n"""
-baseurls = [
+cdns = [
     "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/",
     "https://shared.fastly.steamstatic.com/community_assets/images/apps/",
-    ]
+]
 exit_codes = """\n\nExit codes:
+0: No issues.
 -1: Platform not supported.
 -2: Invalid usage.
 -3: Invalid path or file specified.
 -4: Failure refreshing GTK icon cache."""
-icons = {}
+icons = []
 
 print(banner)
 
@@ -58,123 +58,118 @@ if arglen < 1 or arglen > 2:
     print(implementation.usage + exit_codes)
     sys.exit(-2)
 
-searchpath = sys.argv[1]
-iconpath = ""
+search_path = sys.argv[1]
+icon_storage = ""
 
 if arglen == 2:
-    iconpath = sys.argv[2]
+    icon_storage = sys.argv[2]
 
 # not the cleanest way of doing this
-if not os.path.exists(searchpath):
-    cprint(searchpath + " does not exist.", "red")
+if not os.path.exists(search_path):
+    cprint(search_path + " does not exist.", "red")
     sys.exit(-3)
 
-if os.path.isfile(searchpath):
-    cprint(searchpath + " is a file.", "red")
+if os.path.isfile(search_path):
+    cprint(search_path + " is a file.", "red")
     sys.exit(-3)
 
-if not iconpath == "":
-    if not os.path.exists(iconpath):
-        cprint(iconpath + " does not exist.", "red")
+if not icon_storage == "":
+    if not os.path.exists(icon_storage):
+        cprint(icon_storage + " does not exist.", "red")
         sys.exit(-3)
     
-    if os.path.isfile(iconpath):
-        cprint(iconpath + " is a file.", "red")
+    if os.path.isfile(icon_storage):
+        cprint(icon_storage + " is a file.", "red")
         sys.exit(-3)
 
 # Create list of icons
 if not implementation.refresh_icon_cache():
     sys.exit(-4)
 
-print("Searching for valid Steam shortcuts in " + searchpath + "...")
-for filename in os.scandir(searchpath):
+print("Searching for valid Steam shortcuts in " + search_path + "...")
+for filename in os.scandir(search_path):
     # Igore directories or any files that are not shortcuts.
     if not filename.is_file():
         continue
-
-    if not implementation.is_shortcut(filename):
+    elif not implementation.is_shortcut(filename):
         continue
 
     try:
-        iconobj = implementation.read_shortcut(filename)
-        if iconobj is not None:
-            icons[iconobj.steamid] = iconobj
-    except Exception as error:
-        cprint(filename.name + ": Could not open the file. Make sure it's not in use and it's permissions are set correctly. Skipping.", "red")
+        icon = implementation.read_shortcut(filename)
+        if icon is not None:
+            icons.append(icon)
+    except Exception as exception:
+        cprint(filename.name + ": Could not open the shortcut file. Make sure it's not in use and it's permissions are set correctly.", "yellow")
         traceback.print_exc()
         continue
 
-print("")
-
-# Check if there are icons to redownload
+# If there are icons to download, ask the user to continue
 if len(icons) < 1:
-    print("No icons need to be redownloaded. Refer to the log above for any errors.")
+    print("\nThere are no icons to download. Refer to the log above for details.")
     sys.exit(0)
 
-# Print the results and ask for user confirmation
-print("Found " + str(len(icons)) + " missing icons.")
-print("Do you want to redownload the icons? (y/N): ", end="")
-
-choice = input().lower()
-
-print("")
-
-if not choice == "y":
-    print(colored("Cancelled.", "red"))
-    sys.exit(0)
-
-iconpath = detector.setupiconpath(iconpath)
+while True:
+    print("\nThere are " + str(len(icons)) + " icons to download.")
+    print("Do you want to continue? (y/N): ", end="")
+    
+    choice = input().lower()
+    if choice == "n" or choice == "":
+        sys.exit(0)
+    elif choice == "y":
+        break
 
 # Download the icons
-print("Downloading " + str(len(icons)) + " icons...")
+def get_request(icon, cdn):
+    url = current_cdn + icon.steamid + "/" + icon.name
+    return requests.get(url)
 
 errors = 0
+cdn_index = 0
+current_cdn = cdns[cdn_index]
+icon_storage = implementation.setup_icon_storage_path(icon_storage)
+print("\nDownloading " + str(len(icons)) + " icons...")
 
-current_baseurl_index = 0
-current_baseurl = baseurls[current_baseurl_index]
-
-for steamid, icon in icons.items():
-    # Create the URL and make a request
-    url = current_baseurl + steamid + "/" + icon.name
-    response = requests.get(url)
-
+for icon in icons:
+    # Get icon as a request
+    response = get_request(icon, current_cdn)
     while not response.ok:
-        print(colored("Got code " + str(response.status_code) + " at CDN " + current_baseurl, "red"))
-        current_baseurl_index = current_baseurl_index + 1
-        if current_baseurl_index < len(baseurls):
-            current_baseurl = baseurls[current_baseurl_index]
-            print(colored("Retrying with CDN " + current_baseurl, "red"))
-            url = current_baseurl + steamid + "/" + icon.name
-            response = requests.get(url)
-        else:
-            print(colored("All CDNs failed to respond", "red"))
+        if response.status_code == 429:
+            cprint("This IP address is being rate-limited by CDN '" + current_cdn + "'", "red")
+        else
+            cprint("Request failed with code " + str(response.status_code) + " from CDN '" + current_cdn + "'", "red")
+        
+        cdn_index = cdn_index + 1
+        if cdn_index > len(cdns):
+            cprint("All CDNs have been exhaused. If you were being rate-limited, try again later.", "red")
+            cprint("Note that the GTK icon cache may need to be refreshed.", "yellow")
             sys.exit(0)
-
-    # Check if response was ok
-    if not response.ok:
-        print(colored(steamid + ": Failed to download icon. Response code was " + str(response.status_code) + ".", "red"))
-        errors = errors + 1
-        continue
+        
+        current_cdn = cdns[cdn_index]
+        print("Retrying with CDN " + current_cdn)
+        response = get_request(icon, current_cdn)
 
     # Write the downloaded icon to disk
     try:
-        writepath = detector.writeicon(icon, response, iconpath)
-    except Exception as error:
-        print(colored(steamid + ": Failed to write the icon to disk.", "red"))
+        write_path = implementation.write_icon(icon, response, icon_storage)
+    except Exception as exception:
+        cprint(icon.steamid + ": Failed to write the icon file to disk.", "red")
         traceback.print_exc()
         errors = errors + 1
         continue
     
     try:
-        detector.updateshortcuts(icon, searchpath, writepath)
-    except Exception as error:
-        print(colored(steamid + ": Failed to update application shortcut", "red"))
+        implementation.update_shortcuts(icon, search_path, write_path)
+    except Exception as exception:
+        cprint(icon.steamid + ": Failed to update shortcut file with new icon.", "red")
         traceback.print_exc()
         errors = errors + 1
         continue
 
-    print(colored(steamid + ": Downloaded and saved successfully.", "green"))
+    cprint(icon.steamid + ": Downloaded successfully.", "green")
 
-print("\nDownloading completed with " + str(errors) + " errors. Refer to the above log for details.")
+implementation.refresh_icon_cache()
 
-detector.refreshiconcache()
+if errors > 0
+    print("\nDownloading completed with " + str(errors) + " errors. Refer to the log above for details.")
+else
+    print("\nDownloading completed. Refer to the log above for details.")
