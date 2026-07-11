@@ -1,5 +1,5 @@
 # Steam Icon Fixer
-# Copyright (C) 2023 Liam "AyesC" Hogan
+# Copyright (C) 2023, 2026 Liam "AyesC" Hogan and contributors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,44 +17,37 @@
 import os
 import re
 
-from termcolor import colored
-
+from termcolor import cprint
 from ..types import Icon
 
-usage = """---------------------------------------------
-
-Usage:
-sif.exe <path to file>
+usage = """Usage:
+python sif.pyz <path to folder>
 
 Examples:
-sif.exe C:\\Users\\user\\Desktop
-sif.exe "C:\\Users\\user\\Desktop\\Steam Games"
-sif.exe "C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Steam"
-
-Errors & Exit Codes:
-<path> does not exist. (exit code 1): The specified directory does not exist.
-<path> is a file. (exit code 2): The specified path is not a directory.
-Incompatible operating system (exit code 100)
+python sif.pyz C:\\Users\\user\\Desktop
+python sif.pyz "C:\\Users\\user\\Desktop\\Steam Games"
+python sif.pyz "C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Steam"
 """
 
-def refreshiconcache():
-    # Unneeded on Windows
-    pass
+def refresh_icon_cache():
+    # Unused on Windows
+    return True
 
-def isshortcut(filename):
+def is_shortcut(filename):
     return filename.name.endswith(".url")
 
-def setupiconpath(filename):
+def setup_iconpath(filename):
+    # Unused on Windows
     return ""
 
-def readshortcut(filename):
+def read_shortcut(filename):
     with open(filename, "r") as file:
         # Read contents and check if it is a valid internet shortcut file
         contents = file.read()
         isvalid = re.search(r"\[InternetShortcut\]\n", contents)
 
-        if isvalid == None:
-            print(colored(filename.name + ": File is not a valid internet shortcut. Skipping.", "red"))
+        if isvalid is None:
+            cprint(filename.name + ": File is not a valid internet shortcut. Skipping.", "yellow")
             return None
 
         # Get the Steam ID, icon path, and icon file name
@@ -62,8 +55,8 @@ def readshortcut(filename):
         iconpathmatch = re.search(r"IconFile=([^\n]*)\n", contents)
         iconnamematch = re.search(r"\\([^\n\\]*)\n", contents)
 
-        if steamidmatch == None or iconpathmatch == None or iconnamematch == None:
-            print(colored(filename.name + ": Shortcut doesn't appear to be a Steam shortcut. Skipping.", "blue"))
+        if steamidmatch is None or iconpathmatch is None or iconnamematch is None:
+            cprint(filename.name + ": Shortcut doesn't appear to be a Steam shortcut. Skipping.", "blue")
             return None
 
         steamid = steamidmatch.group(1)
@@ -73,20 +66,21 @@ def readshortcut(filename):
         # Check if the icon exists
         if os.path.exists(iconpath):
             if not os.path.isfile(iconpath):
-                print(colored(filename.name + ": Icon path is a directory. This error must be fixed manually. Skipping.", "red"))
+                cprint(filename.name + ": Icon path is a directory. This error must be fixed manually.", "red")
                 return None
             else:
-                print(colored(filename.name + ": Icon file is present, nothing needs to be done. Skipping.", "green"))
+                cprint(filename.name + ": Icon is present, nothing needs to be done.", "green")
                 return None
 
         # Create an icon object and place it into the icon collection
-        print(colored(filename.name + ": Icon missing, valid Steam game. Will be redownloaded.", "yellow"))
+        cprint(filename.name + ": Icon is missing and will be redownloaded.", "yellow")
         return Icon(steamid, iconpath, iconname, filename)
 
-def writeicon(icon, response, iconpath):
+def write_icon(icon, response, iconpath):
     with open(icon.path, "wb") as file:
         file.write(response.content)
     return icon.path
 
-def updateshortcuts(icon, searchpath, iconpath):
+def update_shortcuts(icon, searchpath, iconpath):
+    # Unused on Windows
     return None

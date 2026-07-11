@@ -1,5 +1,5 @@
 # Steam Icon Fixer
-# Copyright (C) 2023 Liam "AyesC" Hogan
+# Copyright (C) 2023, 2026 Liam "AyesC" Hogan and contributors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import io
 import os
 import re
 
-from termcolor import colored
+from termcolor import cprint
 from steam.client import SteamClient
 from steam.enums.emsg import EMsg
 from PIL import Image
@@ -31,22 +31,17 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
-usage = """---------------------------------------------
+arg_count = 2
 
-Usage:
-sif <path to file> [path to icons]
+usage = """Usage:
+python sif.pyz <path to shortcuts directory> [path to icons directory]
 
 Examples:
-sif ~/.local/share/applications
-sif ~/Desktop
-sif ~/Desktop/Steam Games
-sif ~/.local/share/applications $HOME/.icons
-sif /usr/share/applications/ /usr/share/pixmaps
-
-Errors & Exit Codes:
-<path> does not exist. (exit code 1): The specified directory does not exist.
-<path> is a file. (exit code 2): The specified path is not a directory.
-Incompatible operating system (exit code 100)
+python sif.pyz ~/Desktop
+python sif.pyz ~/Desktop/Steam Games
+python sif.pyz ~/.local/share/applications
+python sif.pyz ~/.local/share/applications $HOME/.icons
+python sif.pyz /usr/share/applications/ /usr/share/pixmaps
 """
 
 gtk_sizes = [16, 32, 48, 64, 128, 256, 512, 1024, 2048]
@@ -56,15 +51,21 @@ gtk_icon_theme = Gtk.IconTheme.get_default()
 steamapi = SteamClient()
 steamapi.anonymous_login()
 
-def refreshiconcache():
-    print("Refreshing icon cache")
+def refresh_icon_cache():
+    print("Refreshing the GTK icon cache, this might take a moment...")
     Path(gtk_user_path).touch()
-    subprocess.run(["gtk-update-icon-cache"])
+    result = subprocess.run(["gtk-update-icon-cache"])
 
-def isshortcut(filename):
+    if result.returncode != 0:
+        cprint("Failed to update the icon cache. Try executing 'gtk-update-icon-cache' in another terminal for more information.", "red")
+        return False
+
+    return True
+
+def is_shortcut(filename):
     return filename.name.endswith(".desktop")
 
-def setupiconpath(filename):
+def setup_icon_path(filename):
     if len(filename) == 0:
         # Empty path signifies use Gtk icon paths
         return ''
@@ -72,7 +73,7 @@ def setupiconpath(filename):
         os.makedirs(filename)
     return filename
 
-def readshortcut(filename):
+def read_shortcut(filename):
     with open(filename, "r") as file:
         # Read contents and check if it is a valid desktop shortcut file
         contents = file.read()
@@ -125,7 +126,7 @@ def readshortcut(filename):
         print(colored(filename.name + ": Icon missing, valid Steam game. Will be redownloaded.", "yellow"))
         return Icon(steamid, iconpath, iconname, filename)
 
-def writeicon(icon, response, iconpath):
+def write_icon(icon, response, iconpath):
     # Empty iconpath means use Gtk icons
     img = Image.open(io.BytesIO(response.content))
     if len(iconpath) == 0:
@@ -146,7 +147,7 @@ def writeicon(icon, response, iconpath):
         img.save(savepath, "PNG")
         return str(savepath)
 
-def updateshortcuts(icon, searchpath, iconpath):
+def update_shortcuts(icon, searchpath, iconpath):
     with open(icon.shortcutfilename, "r") as file:
         contents = file.read()
         contents = re.sub(r"Icon=([^\n]*)\n", "Icon=" + iconpath + "\n", contents)

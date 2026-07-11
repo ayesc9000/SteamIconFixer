@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
-
 # Steam Icon Fixer
-# Copyright (C) 2023 Liam "AyesC" Hogan
+# Copyright (C) 2023, 2026 Liam "AyesC" Hogan and contributors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,4 +14,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/.
 
-from steamiconfixer import main
+# Stores an icon's steam id, file path, and file name
+class Icon:
+    def __init__(self, steamid, path, name, shortcutfilename):
+        self.steamid = steamid
+        self.path = path
+        self.name = name
+        self.shortcutfilename = shortcutfilename

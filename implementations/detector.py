@@ -1,5 +1,5 @@
 # Steam Icon Fixer
-# Copyright (C) 2023 Liam "AyesC" Hogan
+# Copyright (C) 2023, 2026 Liam "AyesC" Hogan and contributors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,15 +14,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/.
 
-import os
+import platform
 
-from steamiconfixer.compat import windows
-from steamiconfixer.compat import linux
+from implementations import windows, linux
 
-def getcompat():
-    if os.name == "nt":
-        return windows
-    elif os.name == "posix":
-        return linux
-    else:
-        return None
+platform_names = "Windows, Linux"
+
+def get_implementation():
+    match platform.system():
+        case "Windows":
+            return windows
+        case "Linux":
+            return linux
+        case _:
+            return None
