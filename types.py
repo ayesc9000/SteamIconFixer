@@ -16,8 +16,8 @@
 
 # Stores an icon's steam id, file path, and file name
 class Icon:
-    def __init__(self, steamid, path, name, shortcutfilename):
+    def __init__(self, steamid, path, name, filename):
         self.steamid = steamid
         self.path = path
         self.name = name
-        self.shortcutfilename = shortcutfilename
+        self.filename = filename
