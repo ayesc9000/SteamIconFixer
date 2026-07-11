@@ -41,7 +41,9 @@ exit_codes = """\n\nExit codes:
 -1: Platform not supported.
 -2: Invalid usage.
 -3: Invalid path or file specified.
--4: Failure refreshing GTK icon cache."""
+-4: Failure refreshing GTK icon cache.
+-5: Failure setting up icon storage directory.
+-6: Rate-limited by CDNs or Steam during download."""
 icons = []
 
 print(banner)
@@ -124,10 +126,16 @@ def get_request(icon, cdn):
     url = current_cdn + icon.steamid + "/" + icon.name
     return requests.get(url)
 
+try:
+    implementation.setup_icon_storage_path(icon_storage)
+except Exception as exception:
+    cprint("Could not set up the icon storage directory. Check the required permissions of the target directory.", "red")
+    traceback.print_exc()
+    sys.exit(-5)
+
 errors = 0
 cdn_index = 0
 current_cdn = cdns[cdn_index]
-icon_storage = implementation.setup_icon_storage_path(icon_storage)
 print("\nDownloading " + str(len(icons)) + " icons...")
 
 for icon in icons:
@@ -143,7 +151,7 @@ for icon in icons:
         if cdn_index > len(cdns):
             cprint("All CDNs have been exhaused. If you were being rate-limited, try again later.", "red")
             cprint("Note that the GTK icon cache may need to be refreshed.", "yellow")
-            sys.exit(0)
+            sys.exit(-6)
         
         current_cdn = cdns[cdn_index]
         print("Retrying with CDN " + current_cdn)
