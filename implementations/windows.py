@@ -18,7 +18,7 @@ import os
 import re
 
 from termcolor import cprint
-from ..types import Icon
+from ..classes import Icon
 
 usage = """Usage:
 python sif.pyz <path to folder>

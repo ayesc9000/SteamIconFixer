@@ -26,7 +26,7 @@ from PIL import Image
 from steam.client import SteamClient
 from steam.enums.emsg import EMsg
 from termcolor import cprint
-from ..types import Icon
+from ..classes import Icon
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
