@@ -158,7 +158,7 @@ for icon in icons:
         continue
     
     try:
-        implementation.update_shortcuts(icon, search_path, write_path)
+        implementation.update_shortcuts(icon, write_path)
     except Exception as exception:
         cprint(icon.steamid + ": Failed to update shortcut file with new icon.", "red")
         traceback.print_exc()
